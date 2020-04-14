@@ -10,7 +10,7 @@ soup = BeautifulSoup(response, 'lxml')
 
 csv_file = open('dataset.csv','w')
 csv_writer = csv.writer(csv_file)
-csv_writer.writerow(['Titulo','Autor','Fecha','Entrada'])
+csv_writer.writerow(['Titulo','Autor','Fecha','Entrada','Tags','Comentarios'])
 
 paginas = soup.find('div',class_='pagination')
 for pagina in paginas.ul.find_all('li'):
@@ -30,14 +30,32 @@ for pagina in paginas.ul.find_all('li'):
             contenidoArticulo = art.find('div',class_='entry-content')
             for parrafo in contenidoArticulo.find_all('p'):
                 try:
-                    entrada = entrada + parrafo.text
+                    entrada = entrada + " " +parrafo.text
                 except Exception as e:
                     entrada = entrada
-            csv_writer.writerow([titulo,autor,fecha,entrada])
+            tags = ""
+            try:
+                contenidoTags = art.find('span',class_='tags-links')
+                for tag in contenidoTags.find_all('a'):
+                    try:
+                        tags = tags + " " +tag.text
+                    except Exception as e:
+                        tags = tags
+            except Exception as e:
+                tags = ""
+            comentarios = ""
+            try:
+                contenidoComentarios = art.find('div',class_='comments-area')
+                for comentario in contenidoComentarios.ol.find_all('li'):
+                    try:
+                        comentarios = comentarios + " " +comentario.article.find('div',class_='comment-content').p.text
+                    except Exception as e:
+                        comentarios = comentarios
+            except Exception as e:
+                comentarios = ""
+            print(titulo)
+            csv_writer.writerow([titulo,autor,fecha,entrada,tags,comentarios])
         except Exception as e:
             titulo = None
             print(e)
 csv_file.close()
-
-
-#print(paginas)
